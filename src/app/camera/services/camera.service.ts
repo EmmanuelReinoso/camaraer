@@ -6,6 +6,8 @@ import { Capacitor } from '@capacitor/core';
   providedIn: 'root'
 })
 export class CameraService {
+  // Clave para almacenar la galería en localStorage
+  private readonly GALLERY_STORAGE_KEY = 'app_photo_gallery';
 
   constructor() {
     // No necesitamos detectar la plataforma ya que asumimos que es móvil
@@ -128,6 +130,59 @@ export class CameraService {
     }
   }
 
+  // Métodos para la galería interna
+  
+  // Guardar la galería en localStorage
+  saveGalleryToStorage(images: string[]): void {
+    try {
+      localStorage.setItem(this.GALLERY_STORAGE_KEY, JSON.stringify(images));
+    } catch (error) {
+      console.error('Error al guardar la galería en localStorage:', error);
+    }
+  }
+  
+  // Cargar la galería desde localStorage
+  loadGalleryFromStorage(): string[] {
+    try {
+      const gallery = localStorage.getItem(this.GALLERY_STORAGE_KEY);
+      return gallery ? JSON.parse(gallery) : [];
+    } catch (error) {
+      console.error('Error al cargar la galería desde localStorage:', error);
+      return [];
+    }
+  }
+  
+  // Añadir una imagen a la galería
+  addImageToGallery(imageUrl: string): string[] {
+    const gallery = this.loadGalleryFromStorage();
+    
+    // Evitamos duplicados
+    if (!gallery.includes(imageUrl)) {
+      gallery.unshift(imageUrl); // Añadimos al principio para que sea la más reciente
+      this.saveGalleryToStorage(gallery);
+    }
+    
+    return gallery;
+  }
+  
+  // Eliminar una imagen de la galería
+  removeImageFromGallery(imageUrl: string): string[] {
+    const gallery = this.loadGalleryFromStorage();
+    const index = gallery.indexOf(imageUrl);
+    
+    if (index !== -1) {
+      gallery.splice(index, 1);
+      this.saveGalleryToStorage(gallery);
+    }
+    
+    return gallery;
+  }
+  
+  // Borrar toda la galería
+  clearGallery(): void {
+    localStorage.removeItem(this.GALLERY_STORAGE_KEY);
+  }
+
   // Método para capturar múltiples fotos
   async takeMultiplePictures(count: number = 3): Promise<string[]> {
     const images: string[] = [];
@@ -136,6 +191,9 @@ export class CameraService {
       try {
         const imagePath = await this.takePicture();
         images.push(imagePath);
+        
+        // Añadimos automáticamente a la galería
+        this.addImageToGallery(imagePath);
       } catch (error) {
         console.error(`Error al tomar la foto ${i+1}:`, error);
         // Continuamos con las siguientes fotos incluso si una falla

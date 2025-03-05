@@ -1,19 +1,29 @@
 <div class="camera-container">
     <img *ngIf="imgUrl" [src]="imgUrl" alt="Captured Image" class="captured-image">
-
+    
     <div *ngIf="!imgUrl && !loading" class="placeholder">
         <div class="placeholder-icon">📸</div>
         <div class="placeholder-text">Toma una foto</div>
     </div>
-
+    
     <div *ngIf="loading" class="loading-indicator">
         Cargando...
     </div>
-
-    <button (click)="takePicture()" class="take-picture-button" [disabled]="loading" *ngIf="!errorMessage">
-        📷 Toma una Foto
-    </button>
-
+    
+    <div class="button-container" *ngIf="!errorMessage">
+        <button (click)="takePicture()" class="take-picture-button" [disabled]="loading">
+            📷 Tomar Foto
+        </button>
+        
+        <button (click)="selectFromGallery()" class="gallery-button" [disabled]="loading">
+            🖼️ Seleccionar Imagen
+        </button>
+        
+        <button (click)="toggleGallery()" class="toggle-gallery-button" [disabled]="loading">
+            📱 Ver Galería
+        </button>
+    </div>
+    
     <div *ngIf="errorMessage" class="error-container">
         <div class="error-message">
             {{ errorMessage }}
@@ -21,5 +31,24 @@
         <button (click)="retryCapture()" class="retry-button">
             🔄 Reintentar
         </button>
+    </div>
+    
+    <!-- Galería de fotos -->
+    <div *ngIf="showGallery" class="gallery-container">
+        <div class="gallery-header">
+            <h3>Mis Fotos</h3>
+            <button (click)="toggleGallery()" class="close-gallery-button">✖️</button>
+        </div>
+        
+        <div class="gallery-grid">
+            <div *ngIf="gallery.length === 0" class="gallery-empty">
+                No hay fotos en la galería
+            </div>
+            
+            <div *ngFor="let image of gallery; let i = index" class="gallery-item">
+                <img [src]="image" alt="Foto {{i+1}}" (click)="selectImage(image)">
+                <button class="delete-image-button" (click)="deleteImage(image)">🗑️</button>
+            </div>
+        </div>
     </div>
 </div>

@@ -1,0 +1,25 @@
+<div class="camera-container">
+    <img *ngIf="imgUrl" [src]="imgUrl" alt="Captured Image" class="captured-image">
+
+    <div *ngIf="!imgUrl && !loading" class="placeholder">
+        <div class="placeholder-icon">📸</div>
+        <div class="placeholder-text">Toma una foto</div>
+    </div>
+
+    <div *ngIf="loading" class="loading-indicator">
+        Cargando...
+    </div>
+
+    <button (click)="takePicture()" class="take-picture-button" [disabled]="loading" *ngIf="!errorMessage">
+        📷 Toma una Foto
+    </button>
+
+    <div *ngIf="errorMessage" class="error-container">
+        <div class="error-message">
+            {{ errorMessage }}
+        </div>
+        <button (click)="retryCapture()" class="retry-button">
+            🔄 Reintentar
+        </button>
+    </div>
+</div>
